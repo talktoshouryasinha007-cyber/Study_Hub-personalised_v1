@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remarkable Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0A101D; --bg-nav: #141C2F; --nav-active: #2D3E5C;
+            --text-white: #FFFFFF; --text-muted: #7D95B9; --accent-teal: #21D0B3;
+            --box-bg: #131B2F; --box-border: #1E293B; --book-purple: #3B2A82;
+            --gradient-motivational: linear-gradient(135deg, #131B2F 0%, #1A2B4C 100%);
+        }
+
+        body { background-color: var(--bg-dark); color: var(--text-white); font-family: 'Inter', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .navbar { background-color: var(--bg-nav); padding: 8px; border-radius: 12px; display: flex; gap: 10px; margin-top: 40px; border: 1px solid var(--box-border); position: sticky; top: 20px; z-index: 100; }
+        .nav-item { padding: 10px 24px; color: var(--text-muted); font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.2s; user-select: none; }
+        .nav-item.active { background-color: var(--nav-active); color: var(--accent-teal); }
+        .nav-item:hover:not(.active) { color: var(--text-white); }
+        
+        .container { max-width: 900px; width: 100%; padding: 40px; box-sizing: border-box; }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .teal-text { color: var(--accent-teal); }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem; }
+
+        .quote-box { background: var(--gradient-motivational); border-left: 4px solid var(--accent-teal); padding: 30px; border-radius: 0 16px 16px 0; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; min-height: 100px; }
+        .quote-text { font-size: 1.15rem; font-style: italic; color: #E2E8F0; line-height: 1.6; white-space: pre-line; }
+
+        .quick-links { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+        .link-btn { flex: 1; min-width: 150px; padding: 15px; text-align: center; background-color: var(--box-bg); border: 1px solid var(--box-border); border-radius: 12px; color: var(--text-white); font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .link-btn:hover { border-color: var(--accent-teal); transform: translateY(-2px); }
+
+        .dashboard-panel { background-color: var(--box-bg); border: 1px solid var(--box-border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .dashboard-panel h3 { margin-top: 0; color: var(--accent-teal); border-bottom: 1px solid var(--box-border); padding-bottom: 10px; }
+        
+        .att-days-grid { display: flex; justify-content: space-between; margin-top: 15px; flex-wrap: wrap; gap: 10px;}
+        .att-day-label { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; cursor: pointer; }
+        .att-day-label input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; }
+
+        .test-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .days-badge { background-color: rgba(33, 208, 179, 0.15); color: var(--accent-teal); padding: 5px 12px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+        .delete-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #ff6384; transition: transform 0.2s; }
+        .delete-btn:hover { transform: scale(1.2); }
+
+        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 30px; margin-top: 20px; }
+        .book { background-color: var(--book-purple); height: 260px; border-radius: 4px 12px 12px 4px; box-shadow: inset 12px 0 20px rgba(0,0,0,0.3), 5px 5px 15px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s; }
+        .book:hover { transform: translateY(-5px); }
+        .book-title { font-size: 1.3rem; font-weight: 700; letter-spacing: 2px; }
+
+        .tracker-view { display: none; }
+        .chapter-card { background-color: var(--box-bg); border: 1px solid var(--box-border); border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        .chapter-header { display: flex; align-items: center; gap: 15px; font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--box-border); }
+        .sub-tasks { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-left: 35px; }
+        .task-label { display: flex; align-items: center; gap: 10px; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; }
+
+        .form-group { margin-bottom: 20px; }
+        input[type="date"], input[type="url"], select { width: 100%; padding: 12px; border-radius: 8px; background-color: var(--box-bg); border: 1px solid var(--box-border); color: var(--text-white); font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        .btn { background-color: var(--accent-teal); color: var(--bg-dark); border: none; padding: 12px 24px; font-weight: 600; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block;}
+        .btn-purple { background-color: #5D3FD3; color: white; }
+
+        .upload-box { background-color: var(--box-bg); border: 2px dashed var(--box-border); border-radius: 12px; padding: 60px 40px; text-align: center; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="nav-item active" onclick="switchTab('home')">Home</div>
+        <div class="nav-item" onclick="switchTab('tracker')">Study Tracker</div>
+        <div class="nav-item" onclick="switchTab('tests')">Add Test</div>
+        <div class="nav-item" onclick="switchTab('pdf')">PDF Tool</div>
+    </div>
+
+    <div class="container">
+        <div id="home" class="section active">
+            <h1>Hey <span class="teal-text">Shourya</span>,</h1>
+            <p class="subtitle">What's on your mind today?</p>
+            
+            <div class="quote-box">
+                <div class="quote-text" id="ai-quote">Fetching today's inspiration...</div>
+            </div>
+
+            <div class="quick-links">
+                <a href="https://dikshant.schoolpad.in/dashboardFeed/feed" target="_blank" rel="noopener noreferrer" class="link-btn">🏫 SchoolPad</a>
+                <button onclick="window.open('https://classroom.google.com', '_blank')" class="link-btn" style="font-size:1rem; font-family:'Inter', sans-serif;">📝 Google Classroom</button>
+                <a href="https://complete-it-v2-dmkh.onrender.com/" target="_blank" rel="noopener noreferrer" class="link-btn" style="border-color: var(--accent-teal);">✅ Complete It Now</a>
+            </div>
+
+            <div class="dashboard-panel">
+                <h3>Weekly Attendance</h3>
+                <div class="att-days-grid">
+                    <label class="att-day-label"><input type="checkbox" class="att-chk" onchange="calcAttendance()"> Mon</label>
+                    <label class="att-day-label"><input type="checkbox" class="att-chk" onchange="calcAttendance()"> Tue</label>
+                    <label class="att-day-label"><input type="checkbox" class="att-chk" onchange="calcAttendance()"> Wed</label>
+                    <label class="att-day-label"><input type="checkbox" class="att-chk" onchange="calcAttendance()"> Thu</label>
+                    <label class="att-day-label"><input type="checkbox" class="att-chk" onchange="calcAttendance()"> Fri</label>
+                    <label class="att-day-label"><input type="checkbox" class="att-chk" onchange="calcAttendance()"> Sat</label>
+                </div>
+                <div style="margin-top: 20px; text-align: center; font-weight: 600;">
+                    Weekly Total: <span id="att-percent" class="teal-text" style="font-size: 1.5rem;">0%</span>
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <h3>Upcoming Tests</h3>
+                <div id="scheduled-tests-container">
+                    <div style="color: var(--text-muted); text-align: center; padding: 10px 0;">No tests scheduled.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tracker" class="section">
+            <h2>Study Tracker</h2>
+            <div id="notebook-grid" class="book-grid">
+                <div class="book" onclick="openSubject('Maths')"><div class="book-title">MATHS</div></div>
+                <div class="book" onclick="openSubject('Physics')"><div class="book-title">PHYSICS</div></div>
+                <div class="book" onclick="openSubject('Chemistry')"><div class="book-title">CHEMISTRY</div></div>
+                <div class="book" onclick="openSubject('Biology')"><div class="book-title">BIOLOGY</div></div>
+            </div>
+            <div id="chapter-view" class="tracker-view">
+                <button class="btn" style="background: var(--box-border); color: white; margin-bottom: 20px;" onclick="closeSubject()">← Back</button>
+                <h2 id="subject-title" class="teal-text"></h2>
+                <div id="chapter-list-container"></div>
+            </div>
+        </div>
+
+        <div id="tests" class="section">
+            <h2>Schedule a Test</h2>
+            <div class="chapter-card" style="max-width: 500px; margin: auto;">
+                <form id="add-test-form">
+                    <div class="form-group"><label>Topic</label><select id="test-chapter" required></select></div>
+                    <div class="form-group"><label>Date</label><input type="date" id="test-date" required></div>
+                    <div class="form-group"><label>PDF Link</label><input type="url" id="test-link" placeholder="G-Drive Link" required></div>
+                    <button type="submit" class="btn" style="width: 100%;">Add to Dashboard</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="pdf" class="section">
+            <h2>Remarkable PDF Tool</h2>
+            <div class="upload-box" onclick="document.getElementById('pdf-upload').click();">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📄</div>
+                <div id="upload-text" style="font-weight: 600;">Click to convert PDF to Dark Mode</div>
+                <input type="file" id="pdf-upload" style="display: none;" accept="application/pdf" onchange="handlePDFUpload(event)">
+                <br>
+                <a href="https://my.remarkable.com/" target="_blank" rel="noopener noreferrer" id="remarkable-btn" class="btn btn-purple" style="display: none; margin-top: 15px;">Upload to reMarkable ↗</a>
+                <button id="reset-pdf-btn" class="btn" style="display: none; margin-top: 15px; background-color: var(--box-border); color: white;" onclick="resetPDFTool(event)">Convert Another PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const syllabusData = {
+            "Maths": ["Real Numbers", "Polynomials", "Pair of Linear Equations", "Quadratic Equations", "Arithmetic Progressions", "Triangles", "Coordinate Geometry", "Trigonometry", "Applications of Trigonometry", "Circles", "Constructions", "Areas Related to Circles", "Surface Areas and Volumes", "Statistics", "Probability"],
+            "Physics": ["Light – Reflection & Refraction", "Human Eye & Colourful World", "Electricity", "Magnetic Effects of Electric Current", "Sources of Energy"],
+            "Chemistry": ["Chemical Reactions & Equations", "Acids, Bases & Salts", "Metals & Non-Metals", "Carbon & Its Compounds", "Periodic Classification"],
+            "Biology": ["Life Processes", "Control & Coordination", "How do Organisms Reproduce", "Heredity & Evolution", "Our Environment", "Natural Resources"]
+        };
+        const subTasks = ["NCERT", "Question Bank", "One-Shot", "Worksheet"];
+
+        // State variables saved in localStorage
+        let trackerState = JSON.parse(localStorage.getItem('studyTracker')) || {};
+        let tests = JSON.parse(localStorage.getItem('scheduledTests')) || [];
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // --- STUDY TRACKER LOGIC ---
+        function openSubject(sub) {
+            document.getElementById('notebook-grid').style.display = 'none';
+            document.getElementById('chapter-view').style.display = 'block';
+            document.getElementById('subject-title').innerText = sub;
+            const container = document.getElementById('chapter-list-container');
+            container.innerHTML = '';
+            
+            syllabusData[sub].forEach((ch, i) => {
+                const id = `${sub}-${i}`;
+                let tasks = '';
+                subTasks.forEach((t, tIndex) => { 
+                    const subId = `${id}-sub-${tIndex}`;
+                    const isChecked = trackerState[subId] ? 'checked' : '';
+                    tasks += `<label class="task-label"><input type="checkbox" id="${subId}" class="${id}-sub" onchange="checkParent('${id}', '${subId}')" ${isChecked}> ${t}</label>`; 
+                });
+                
+                const isMainChecked = trackerState[`${id}-m`] ? 'checked' : '';
+                container.innerHTML += `<div class="chapter-card"><div class="chapter-header"><input type="checkbox" id="${id}-m" onchange="toggleSubs('${id}')" style="width:20px;height:20px;" ${isMainChecked}><label>${i+1}. ${ch}</label></div><div class="sub-tasks">${tasks}</div></div>`;
+            });
+        }
+        function closeSubject() { document.getElementById('chapter-view').style.display = 'none'; document.getElementById('notebook-grid').style.display = 'grid'; }
+        
+        function toggleSubs(id) { 
+            const m = document.getElementById(id+'-m').checked; 
+            trackerState[`${id}-m`] = m;
+            document.querySelectorAll('.'+id+'-sub').forEach(b => { b.checked = m; trackerState[b.id] = m; });
+            localStorage.setItem('studyTracker', JSON.stringify(trackerState)); 
+        }
+
+        function checkParent(id, subId) { 
+            trackerState[subId] = document.getElementById(subId).checked;
+            const allChecked = Array.from(document.querySelectorAll('.'+id+'-sub')).every(b => b.checked);
+            document.getElementById(id+'-m').checked = allChecked;
+            trackerState[`${id}-m`] = allChecked;
+            localStorage.setItem('studyTracker', JSON.stringify(trackerState)); 
+        }
+
+        function calcAttendance() {
+            const count = Array.from(document.querySelectorAll('.att-chk')).filter(c => c.checked).length;
+            document.getElementById('att-percent').innerText = Math.round((count/6)*100) + '%';
+        }
+
+        // --- PDF LOGIC ---
+        function handlePDFUpload(e) {
+            const file = e.target.files[0]; if(!file) return;
+            const txt = document.getElementById('upload-text');
+            const rmkBtn = document.getElementById('remarkable-btn');
+            const resetBtn = document.getElementById('reset-pdf-btn');
+            
+            txt.innerText = "Converting to Dark Mode..."; 
+            rmkBtn.style.display = 'none'; resetBtn.style.display = 'none';
+            
+            const fd = new FormData(); fd.append('pdf_file', file);
+            fetch('/api/convert', {method: 'POST', body: fd}).then(r => r.blob()).then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = "DARK_"+file.name; a.click();
+                txt.innerText = "Success! File Downloaded."; 
+                rmkBtn.style.display = 'inline-block'; resetBtn.style.display = 'inline-block';
+            }).catch(err => {
+                txt.innerText = "Error. Please make sure the Python server is running.";
+                resetBtn.style.display = 'inline-block';
+            });
+        }
+
+        function resetPDFTool(event) {
+            event.stopPropagation();
+            document.getElementById('upload-text').innerText = "Click to convert PDF to Dark Mode";
+            document.getElementById('pdf-upload').value = ""; 
+            document.getElementById('remarkable-btn').style.display = 'none';
+            document.getElementById('reset-pdf-btn').style.display = 'none';
+        }
+
+        // --- TEST SCHEDULING LOGIC ---
+        document.getElementById('add-test-form').onsubmit = (e) => {
+            e.preventDefault();
+            tests.push({c: document.getElementById('test-chapter').value, d: document.getElementById('test-date').value, l: document.getElementById('test-link').value});
+            tests.sort((a,b) => new Date(a.d) - new Date(b.d));
+            localStorage.setItem('scheduledTests', JSON.stringify(tests)); // Save to browser
+            updateTestDashboard();
+            alert("Test Scheduled!"); switchTab('home');
+        };
+
+        function removeTest(index) {
+            if(confirm("Are you sure you want to remove this test?")) {
+                tests.splice(index, 1); // Remove from array
+                localStorage.setItem('scheduledTests', JSON.stringify(tests)); // Update browser save
+                updateTestDashboard(); // Refresh screen
+            }
+        }
+
+        function updateTestDashboard() {
+            const container = document.getElementById('scheduled-tests-container');
+            if (tests.length === 0) { container.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 10px 0;">No tests scheduled. You're all clear!</div>`; return; }
+            
+            container.innerHTML = '';
+            tests.forEach((t, index) => {
+                const diff = Math.ceil((new Date(t.d) - new Date().setHours(0,0,0,0))/(1000*60*60*24));
+                let dayText = diff < 0 ? "Completed" : diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : "In " + diff + " days";
+                let badgeColor = diff <= 0 ? "rgba(125, 149, 185, 0.15)" : diff === 1 ? "rgba(255, 159, 64, 0.2)" : "rgba(33, 208, 179, 0.15)";
+                let textColor = diff <= 0 ? "var(--text-muted)" : diff === 1 ? "#ff9f40" : "var(--accent-teal)";
+
+                container.innerHTML += `
+                    <div class="test-item">
+                        <div>
+                            <b>${t.c}</b><br>
+                            <a href="${t.l}" target="_blank" style="color:var(--accent-teal);font-size:0.85rem;text-decoration:none;">View Paper ↗</a>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div class="days-badge" style="background-color: ${badgeColor}; color: ${textColor};">${dayText}</div>
+                            <button class="delete-btn" onclick="removeTest(${index})" title="Remove Test">✖</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // --- ON PAGE LOAD ---
+        window.onload = function() {
+            // Check Sunday Reset
+            if (new Date().getDay() === 0) { document.querySelectorAll('.att-chk').forEach(c => c.checked = false); calcAttendance(); }
+            
+            // Fetch AI Quote
+            fetch('/api/quote').then(r => r.json()).then(d => document.getElementById('ai-quote').innerText = d.quote).catch(e => {
+                document.getElementById('ai-quote').innerText = "Discipline is the bridge between goals and accomplishment.";
+            });
+
+            // Populate Dropdown
+            const sel = document.getElementById('test-chapter');
+            for (let s in syllabusData) {
+                let g = document.createElement('optgroup'); g.label = s;
+                syllabusData[s].forEach(c => { let o = document.createElement('option'); o.value = c; o.text = c; g.appendChild(o); });
+                sel.add(g);
+            }
+            
+            // Load saved tests to screen
+            updateTestDashboard();
+        };
+    </script>
+</body>
+</html>
