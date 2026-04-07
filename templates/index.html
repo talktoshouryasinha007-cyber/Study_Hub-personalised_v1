@@ -24,7 +24,7 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* CLOCK & HEADER */
+        /* CLOCK & HEADER (v6 WITH LOGO) */
         .header-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
         .clock-col { text-align: right; }
         #live-time { font-size: 2.2rem; font-weight: 700; color: var(--accent-teal); text-shadow: 0 0 20px rgba(33, 208, 179, 0.3); line-height: 1; }
@@ -43,7 +43,7 @@
         .dashboard-panel { background-color: var(--box-bg); border: 1px solid var(--box-border); border-radius: 16px; padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column; }
         .panel-title { font-size: 1rem; font-weight: 700; color: var(--accent-teal); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: block; }
 
-        /* ACTION NOTES (NEW) */
+        /* ACTION NOTES */
         .note-input-row { display: flex; gap: 10px; margin-bottom: 15px; }
         .notes-list { flex-grow: 1; overflow-y: auto; max-height: 140px; padding-right: 5px; }
         .notes-list::-webkit-scrollbar { width: 6px; }
@@ -73,7 +73,7 @@
         .sub-tasks { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-left: 30px; margin-top: 15px; }
         .task-label { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; }
 
-        /* PROGRESS BARS (NEW) */
+        /* PROGRESS BARS */
         .progress-track { width: 100%; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; margin-top: 10px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--accent-teal); width: 0%; transition: width 0.4s ease; box-shadow: 0 0 10px rgba(33, 208, 179, 0.5); }
         .overall-progress { font-size: 1.2rem; color: var(--text-muted); font-weight: 600; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -98,7 +98,10 @@
     <div class="container">
         <div id="home" class="section active">
             <div class="header-row">
-                <div><h1>Hey <span class="teal-text">Shourya</span>,</h1></div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Hub Logo" style="width: 60px; height: 60px; border-radius: 12px; box-shadow: 0 0 15px rgba(33, 208, 179, 0.4);">
+                    <h1 style="margin: 0;">Hey <span class="teal-text">Shourya</span>,</h1>
+                </div>
                 <div class="clock-col">
                     <div id="live-time">00:00</div>
                     <div id="live-date">Loading date...</div>
@@ -191,7 +194,6 @@
     </div>
 
     <script>
-        // SYLLABUS DATA
         const syllabusData = {
             "Maths": ["Real Numbers", "Polynomials", "Linear Equations", "Quadratic Equations", "Arithmetic Progressions", "Triangles", "Coordinate Geometry", "Trigonometry", "Circles", "Surface Areas", "Statistics", "Probability"],
             "Physics": ["Light", "Human Eye", "Electricity", "Magnetic Effects", "Sources of Energy"],
@@ -200,14 +202,12 @@
         };
         const subTasks = ["NCERT", "Question Bank", "One-Shot", "Worksheet"];
 
-        // STATE MANAGEMENT
         let trackerState = JSON.parse(localStorage.getItem('studyTracker')) || {};
         let tests = JSON.parse(localStorage.getItem('scheduledTests')) || [];
         let attendanceState = JSON.parse(localStorage.getItem('weeklyAttendance')) || [false, false, false, false, false, false];
         let actionNotes = JSON.parse(localStorage.getItem('actionNotes')) || [];
         let currentSubject = "";
 
-        // UI NAVIGATION
         function switchTab(tabId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -215,7 +215,6 @@
             event.currentTarget.classList.add('active');
         }
 
-        // CLOCK
         function updateClock() {
             const now = new Date();
             document.getElementById('live-time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -223,7 +222,6 @@
         }
         setInterval(updateClock, 1000);
 
-        // ACTION NOTES (NEW LOGIC)
         function renderNotes() {
             const container = document.getElementById('notes-container');
             container.innerHTML = '';
@@ -248,14 +246,12 @@
             renderNotes();
         }
 
-        // ATTENDANCE
         function calcAttendance() {
             const checks = Array.from({length:6}, (_,i) => document.getElementById('att-'+i).checked);
             localStorage.setItem('weeklyAttendance', JSON.stringify(checks));
             document.getElementById('att-percent').innerText = Math.round((checks.filter(c => c).length/6)*100) + '%';
         }
 
-        // DYNAMIC TEST DROPDOWN (NEW LOGIC)
         function populateTestDropdown() {
             const select = document.getElementById('test-dropdown');
             select.innerHTML = '<option value="" disabled selected>Select Chapter...</option>';
@@ -284,7 +280,7 @@
             updateTestDashboard();
             alert("Test Scheduled!"); switchTab('home');
             document.getElementById('add-test-form').reset();
-            toggleCustomTest(); // Hide custom box again
+            toggleCustomTest(); 
         };
 
         function removeTest(i) { if(confirm("Delete this test?")) { tests.splice(i, 1); localStorage.setItem('scheduledTests', JSON.stringify(tests)); updateTestDashboard(); } }
@@ -298,7 +294,6 @@
             });
         }
 
-        // TRACKER & LIVE PROGRESS BARS (NEW LOGIC)
         function openSubject(sub) {
             currentSubject = sub;
             document.getElementById('notebook-grid').style.display = 'none';
@@ -356,24 +351,18 @@
                 
                 subTasks.forEach((_, tIdx) => {
                     totalSubTasksForSubject++;
-                    if(trackerState[`${id}-sub-${tIdx}`]) {
-                        chapterCompletedCount++;
-                        completedSubTasksForSubject++;
-                    }
+                    if(trackerState[`${id}-sub-${tIdx}`]) { chapterCompletedCount++; completedSubTasksForSubject++; }
                 });
 
-                // Update Chapter Bar
                 const chapPercent = (chapterCompletedCount / subTasks.length) * 100;
                 const bar = document.getElementById(`bar-${id}`);
                 if(bar) bar.style.width = `${chapPercent}%`;
             });
 
-            // Update Total Subject Text
             const overallPercent = totalSubTasksForSubject === 0 ? 0 : Math.round((completedSubTasksForSubject / totalSubTasksForSubject) * 100);
             document.getElementById('subject-progress-text').innerText = `${overallPercent}% Syllabus Covered`;
         }
 
-        // PDF API TOOL
         function handlePDFUpload(e) {
             const file = e.target.files[0]; if(!file) return;
             const txt = document.getElementById('upload-text');
@@ -387,7 +376,6 @@
         }
         function resetPDFTool(e) { e.stopPropagation(); document.getElementById('upload-text').innerText = "Drop PDF for Remarkable Dark Mode"; document.getElementById('pdf-upload').value = ""; document.getElementById('remarkable-btn').style.display = 'none'; document.getElementById('reset-pdf-btn').style.display = 'none'; }
 
-        // INITIALIZE ON LOAD
         window.onload = function() {
             updateClock();
             renderNotes();
